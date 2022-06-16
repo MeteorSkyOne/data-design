@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}" layout:decorator="layout" >
+<head th:include="layout :: htmlhead" th:with="title='favorites'"></head>
+<body>
+<section layout:fragment="content">
+    <div style="margin-left: 10%;margin-top: 4%;width: 80%">
+        <div sec:authorize="hasRole('ADMIN')" class="layui-row">
+            <form class="layui-form" id="queryForm">
+                <div class="layui-inline">
+                    <select class="layui-col-md1" name="type" lay-verify="" lay-search lay-filter="type">
+                        <option value="">请选择统计类别</option>
+                        <option value="1">人员</option>
+                        <option value="2">部门</option>
+                        <option value="3">报刊</option>
+                        <option value="4">报刊类别</option>
+                    </select>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" id="query">统计</button>
+                </div>
+            </form>
+        </div>
+        <div class="layui-form layui-border-box layui-table-view layui-table-view-1">
+            <table id="subscribe" lay-filter="subscribe"></table>
+        </div>
+    </div>
+
+    <script type="text/html" id="sub">
+        <a class="layui-btn layui-btn-xs" lay-event="sub">订阅</a>
+    </script>
+
+    <script type="text/html" id="toolbar">
+  </script>
+
+    <script>
+        layui.use(['table','layer','form'], function() {
+            var table = layui.table;
+            var layer = layui.layer;
+            var form = layui.form;
+            var $ = layui.$;
+            table.render({
+                elem: "#subscribe",//绑定table的id
+                url: "/behavior/summary?type=1",//数据接口
+                title: '用户表',
+                cols: [
+                    [
+                        {field: 'aa', type: 'numbers'},
+                        {field: 'user', title: '用户名', width: 150, sort: true},
+                        {field: 'total', title: '订阅报刊数', width: 150},
+                        {field: 'counts', title: '总订阅份数', width: 150},
+                        {field: 'price', title: '总订阅金额', width: 150},
+                    ]
+                ],
+                toolbar: '#toolbar',
+                page: false, //开启分页
+                parseData:function (res) {
+                    var data = res.data;
+                    data.forEach(function (item) {
+                        item.user = item[0];
+                        item.total = item[1];
+                        item.counts = item[2];
+                        item.price = item[3];
+                    });
+                    return {
+                        "code": res.code,
+                        "msg": res.msg,
+                        "count": res.data.total,
+                        "data": data
+                    }
+                }
+            });
+
+            form.on('select(type)', function(data){
+                for(i=0;i<5;i++){
+                    $('#var').append('<option value="'+i+'">'+i+'</option>');
+                }
+                $.ajax({
+                    url: '/behavior/getAllTypes?type=' + data.value,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (res) {
+                        var data = res.data;
+                        $('#var').empty();
+                        data.forEach(function (item) {
+                            $('#var').append(new Option(item.name ? item.name : item.username, item.id))
+                        });
+                        form.render('select');
+                    }
+                });
+            });
+
+            $('#queryForm').submit(function (e) {
+                e.preventDefault();
+                var type = $('#queryForm select[name=type]').val();
+                if(type !== ""){
+                    var url = '/behavior/summary?type=' + type;
+                    cols = [
+                        [
+                            {field: 'aa', type: 'numbers'},
+                            {field: 'user', title: '用户名', width: 150, sort: true},
+                            {field: 'total', title: '订阅报刊数', width: 150},
+                            {field: 'counts', title: '总订阅份数', width: 150},
+                            {field: 'price', title: '总订阅金额', width: 150},
+                        ],
+                        [
+                            {field: 'aa', type: 'numbers'},
+                            {field: 'user', title: '部门编号', width: 150, sort: true},
+                            {field: 'total', title: '报刊名', width: 150},
+                            {field: 'counts', title: '订阅份数', width: 150},
+                            {field: 'price', title: '订阅金额', width: 150},
+                        ],
+                        [
+                            {field: 'aa', type: 'numbers'},
+                            {field: 'user', title: '报刊代号', width: 150, sort: true},
+                            {field: 'total', title: '订阅份数', width: 150},
+                            {field: 'counts', title: '订阅月数', width: 150},
+                            {field: 'price', title: '订阅金额', width: 150},
+                        ],
+                        [
+                            {field: 'aa', type: 'numbers'},
+                            {field: 'user', title: '分类编号', width: 150, sort: true},
+                            {field: 'total', title: '报刊名', width: 150},
+                            {field: 'counts', title: '订阅份数', width: 150},
+                            {field: 'price', title: '订阅金额', width: 150},
+                        ]
+                    ];
+                    table.reload('subscribe', {
+                        url: url,
+                        cols: [
+                            cols[type - 1]
+                        ]
+                    });
+                }
+            });
+        });
+    </script>
+</section>
+</body>
+</html>

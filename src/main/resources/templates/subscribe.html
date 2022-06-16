@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}" layout:decorator="layout" >
+<head th:include="layout :: htmlhead" th:with="title='favorites'"></head>
+<body>
+  <section layout:fragment="content">
+    <section sec:authorize="hasRole('ADMIN')">
+      <script>
+        layui.use('layer', function (){
+          var layer = layui.layer;
+          layer.open({
+            title: '权限不足',
+            content: '请使用用户身份登录！',
+            btn: ['确定'],
+            yes: function(index, layero){
+              layer.close(index);
+              window.location.href = "/";
+            }
+          })
+        })
+      </script>
+    </section>
+
+    <section sec:authorize="hasRole('USER')">
+      <div style="margin-left: 10%; margin-top:4%;width: 80%">
+        <div class="layui-row">
+          <table id="subscribe" lay-filter="subscribe"></table>
+        </div>
+      </div>
+
+      <script type="text/html" id="sub">
+        <a class="layui-btn layui-btn-xs" lay-event="sub">订阅</a>
+      </script>
+
+      <script>
+        layui.use(['table','layer'], function() {
+          var table = layui.table;
+          var layer = layui.layer;
+          var $ = layui.$;
+          table.render({
+            elem: "#subscribe",//绑定table的id
+            url: "/newspaper/getAll",//数据接口
+            title: '用户表',
+            cols: [
+              [
+                {field: 'aa', type: 'numbers'},
+                {field: 'id', title: '报刊代号', width: 150, sort: true},
+                {field: 'name', title: '报刊名称', width: 150},
+                {field: 'publisher', title: '出版报社', width: 150},
+                {field: 'publishBetween', title: '出版周期', width: 150},
+                {field: 'price', title: '季度报价', width: 150},
+                {field: 'content', title: '内容介绍', width: 150},
+                {field: 'newspaperClass', title: '分类编号', width: 150},
+                {field: 'months', title: '订阅季度', width: 150, edit: 'text'},
+                {field: 'counts', title: '订阅份数', width: 150, edit: 'text'},
+                {field: 'totalPrice', title: '订阅金额', width: 150},
+                {field: '操作',toolbar:'#sub'}
+              ]
+            ],
+            page: false, //开启分页
+            parseData:function (res) {
+              var data = res.data;
+              data.forEach(function (item) {
+                if(item.newspaperClass != null){
+                  item.newspaperClass = item.newspaperClass.id;
+                }
+              });
+              return {
+                "code": res.code,
+                "msg": res.msg,
+                "count": res.data.total,
+                "data": data
+              }
+            }
+          });
+
+          table.on('edit(subscribe)', function(obj){ //注：edit是固定事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data;
+            var totalPrice = data.price * data.months * data.counts;
+            obj.data.totalPrice = totalPrice;
+            obj.tr.find('td[data-field="totalPrice"]').eq(0).children().text(totalPrice);
+            obj.update(obj.data);
+          });
+
+          table.on("tool(subscribe)", function (obj) {
+            var data = obj.data;
+            if (obj.event === "sub") {
+              layer.open({
+                title: '订阅',
+                btn: ['确定', '取消'],
+                content: '确定要订阅吗？',
+                yes: function (index, layero) {
+                  $.ajax({
+                    url: '/newspaper/subscribe',
+                    type: 'POST',
+                    data: {
+                      id: data.id,
+                      counts: data.counts,
+                      months: data.months
+                    },
+                    success: function (res) {
+                      if (res.code === 0) {
+                        layer.msg('订阅成功', {icon: 1});
+                        table.reload('subscribe');
+                      } else {
+                        layer.msg('订阅失败', {icon: 2});
+                      }
+                    }
+                  });
+                }})
+            }
+          });
+        });
+      </script>
+    </section>
+
+  </section>
+</body>
+</html>

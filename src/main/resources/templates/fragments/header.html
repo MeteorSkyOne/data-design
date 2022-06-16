@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}">
+<body>
+<header th:fragment="header">
+    <ul class="layui-nav">
+        <i class="layui-icon layui-icon-face-smile"></i>
+        <li class="layui-nav-item">报刊订阅系统</li>
+        <li class="layui-nav-item" style="margin-left: 10%">
+            <a th:href="@{/}">首页</a>
+        </li>
+        <li class="layui-nav-item">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/entry?t=1}">录入信息</a>
+        </li>
+        <li class="layui-nav-item">
+            <a th:href="@{/subscribe}">订阅</a>
+        </li>
+        <li class="layui-nav-item">
+            <a th:href="@{/query}">查询</a>
+        </li>
+        <li class="layui-nav-item">
+            <a th:href="@{/summary}">统计</a>
+        </li>
+        <li class="layui-nav-item" style="margin-left: 45%">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/backup}">系统维护</a>
+        </li>
+        <li class="layui-nav-item">
+            <a th:href="@{/home}">个人中心</a>
+        </li>
+        <li class="layui-nav-item">
+            <a href=""><img src="//t.cn/RCzsdCq" class="layui-nav-img">我</a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/logout}">退出</a></dd>
+            </dl>
+        </li>
+    </ul>
+</header>
+</body>
+</html>

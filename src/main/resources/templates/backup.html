@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}" layout:decorator="layout" >
+<head th:include="layout :: htmlhead" th:with="title='favorites'"></head>
+<body>
+<section layout:fragment="content">
+  <section sec:authorize="hasRole('USER')">
+    <script>
+      layui.use('layer', function (){
+        var layer = layui.layer;
+        layer.open({
+          title: '权限不足',
+          content: '请联系管理员！',
+          btn: ['确定'],
+          yes: function(index, layero){
+            layer.close(index);
+            window.location.href = "/";
+          }
+        })
+      })
+    </script>
+  </section>
+  <section sec:authorize="hasRole('ADMIN')">
+    <div style="margin-left: 30%;margin-top: 4%;width: 30%">
+      <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+        <ul class="layui-tab-title">
+          <li class="layui-this">备份</li>
+          <li>恢复</li>
+        </ul>
+        <div class="layui-tab-content">
+          <div id='backup' class="layui-tab-item layui-show">
+            <form class="layui-form" action="">
+              <div class="layui-form-item">
+                <label class="layui-form-label">备份文件名</label>
+                <div class="layui-input-inline">
+                  <input type="text" name="filename" required  lay-verify="required" placeholder="请输入备份文件名" autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">.sql</div>
+              </div>
+              <div class="layui-form-item">
+                <div class="layui-input-block">
+                  <button class="layui-btn" lay-submit lay-filter="backup">开始备份</button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div id='restore' class="layui-tab-item">
+            <form class="layui-form" action="">
+              <div class="layui-form-item">
+                <label class="layui-form-label">恢复文件名</label>
+                <div class="layui-input-block">
+                  <select id='restoreFile' name="filename" lay-verify="required">
+                    <option value=""></option>>
+                  </select>
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <div class="layui-input-block">
+                  <button class="layui-btn" lay-submit lay-filter="restore">开始恢复</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+      layui.use('form', function(){
+        var form = layui.form;
+        var $ = layui.$;
+
+        $.ajax({
+            url: '/security/getBackupList',
+            type: 'get',
+            dataType: 'json',
+            success: function(data) {
+              var data = data.data;
+              $('#restoreFile').empty();
+              data.forEach(function(item, index) {
+                $('#restoreFile').append(new Option(item, item));
+              });
+              form.render('select');
+            }
+        });
+
+        form.on('submit(backup)', function(data){
+          $.ajax({
+            type: "POST",
+            url: "/security/backup",
+            data: data.field,
+            success: function(data){
+              layer.open({
+                title: '备份成功',
+                content: '备份成功，请重新登录！',
+                btn: ['确定'],
+                yes: function(index, layero){
+                  layer.close(index);
+                }
+              })
+            },
+            error: function(data){
+                layer.open({
+                    title: '备份失败',
+                    content: '备份失败！',
+                    btn: ['确定'],
+                    yes: function(index, layero){
+                    layer.close(index);
+                    }
+                })
+            }
+          });
+          return false;
+        });
+
+        form.on('submit(restore)', function(data){
+          $.ajax({
+            type: "POST",
+            url: "/security/restore",
+            data: data.field,
+            success: function(data){
+              layer.open({
+                title: '恢复成功',
+                content: '恢复成功！',
+                btn: ['确定'],
+                yes: function(index, layero){
+                  layer.close(index);
+                }
+              })
+            },
+            error: function(data){
+              layer.open({
+                title: '备份失败',
+                content: '备份失败！',
+                btn: ['确定'],
+                yes: function(index, layero){
+                  layer.close(index);
+                }
+              })
+            }
+          });
+          return false;
+        });
+      });
+    </script>
+  </section>
+
+
+</section>
+</body>
+</html>

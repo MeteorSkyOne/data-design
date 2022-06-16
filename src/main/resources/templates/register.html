@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+	<title>报刊订阅管理系统</title>
+		<meta charset="utf-8">
+		<link href="css/style.css" rel='stylesheet' type='text/css' />
+		<link href="layui/css/layui.css" rel='stylesheet' type='text/css' >
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+</head>
+<body>
+	 <!-----start-main---->
+	 <div class="main">
+		<div class="login-form">
+			<h1 th:if="${session.reg_result}=='3'">用户已存在</h1>
+			<h1 th:if="${session.reg_result}=='0'">注册成功</h1>
+			<h1 th:if="${session.reg_result}=='2'">用户名或密码长度有误</h1>
+			<h1>报刊订阅管理系统</h1>
+					<div class="head">
+						<img src="/images/user.png" alt=""/>
+					</div>
+				<form method="post" th:action="@{/doRegister}">
+						<input type="text" class="text" name="username" value="用户名" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = '用户名';}" >
+						<input type="password" name="password" value="password" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Password';}">
+						<div class="submit">
+							<input type="submit" value="注册" >
+					</div>
+					<p><a th:href="@{/login}">登录</a></p>
+				</form>
+			</div>
+			<!--//End-login-form-->
+		</div>
+			 <!-----//end-main---->
+
+<div style="display:none"><script src='https://v7.cnzz.com/stat.php?id=155540&web_id=155540' language='JavaScript' charset='gb2312'></script></div>
+</body>
+</html>

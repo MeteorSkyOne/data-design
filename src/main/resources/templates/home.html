@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}" layout:decorator="layout" >
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <section layout:fragment="content">
+        <div style="margin-top: 4%; margin-left: 30%;width: 1000px">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">真实姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="realname" required  lay-verify="" placeholder="请输入真实姓名" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">邮箱</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="email" required  lay-verify="" placeholder="请输入邮箱" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">身份证号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="idcard" required  lay-verify="" placeholder="请输入身份证号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系电话</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phone" required  lay-verify="" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系地址</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="address" required  lay-verify="" placeholder="请输入联系地址" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">部门号</label>
+                    <div class="layui-input-block">
+                        <select name="department" id="department" lay-verify="" lay-filter="department">
+                            <option value=""></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" name="password" required lay-verify="" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">6-20位</div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            //Demo
+            layui.use('form', function(){
+                var form = layui.form;
+                var $ = layui.$;
+
+                $.ajax({
+                    url: '/behavior/getAllTypes?type=2',
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (res) {
+                        var data = res.data;
+                        $('#department').empty();
+                        data.forEach(function (item) {
+                            $('#department').append(new Option(item.name ? item.name : item.username, item.id))
+                        });
+                        form.render('select');
+                    }
+                });
+
+                $.ajax({
+                    url: '/user/getMyInfo',
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (res) {
+                        var data = res.data;
+                        $('input[name="realname"]').val(data.realname);
+                        $('input[name="email"]').val(data.email);
+                        $('input[name="idcard"]').val(data.idcard);
+                        $('input[name="phone"]').val(data.phone);
+                        $('input[name="address"]').val(data.address);
+                        $('#department').val(data.department);
+                        form.render('select');
+                    }
+                });
+
+                //监听提交
+                form.on('submit(formDemo)', function(data){
+                    var data = data.field;
+                    data['username']='';
+                    $.ajax({
+                        url: '/user/update',
+                        type: 'post',
+                        data: data,
+                        dataType: 'json',
+                        success: function (res) {
+                            if (res.code == 0) {
+                                layer.open({
+                                    title: '提示',
+                                    content: '修改成功',
+                                    yes: function () {
+                                        window.location.reload();
+                                    }
+                                });
+                            } else {
+                                layer.open({
+                                    title: '提示',
+                                    content: '修改失败',
+                                    yes: function () {
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+        </script>
+
+    </section>
+</body>
+</html>

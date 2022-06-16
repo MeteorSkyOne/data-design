@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/newspaper?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: root
+    password: 123
+  http:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+    open-in-view: true
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    check-template: true
+    suffix: .html
+    encoding: utf-8
+    content-type: text/html
+    mode: HTML5
+  static-resources:
+    prefix: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,classpath:/backup/
+debug: true
+server:
+  port: 8080
+mysqlpath: J:/wamp/bin/mysql/mysql5.6.17/bin

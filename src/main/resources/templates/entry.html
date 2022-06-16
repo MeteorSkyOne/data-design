@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}" layout:decorator="layout" >
+<head th:include="layout :: htmlhead" th:with="title='favorites'"></head>
+<body>
+  <section layout:fragment="content">
+    <section sec:authorize="hasRole('USER')">
+      <script>
+        layui.use('layer', function (){
+          var layer = layui.layer;
+          layer.open({
+            title: '权限不足',
+            content: '请联系管理员！',
+            btn: ['确定'],
+            yes: function(index, layero){
+              layer.close(index);
+              window.location.href = "/";
+            }
+          })
+        })
+      </script>
+    </section>
+
+    <section sec:authorize="hasRole('ADMIN')">
+      <ul class="layui-nav layui-nav-tree layui-nav-side" lay-filter="test" style="top: 4%">
+        <!-- 侧边导航: <ul class="layui-nav layui-nav-tree layui-nav-side"> -->
+        <li class="layui-nav-item"><a th:href="@{/entry?t=1}">用户信息</a></li>
+        <li class="layui-nav-item"><a th:href="@{/entry?t=2}">用户部门</a></li>
+        <li class="layui-nav-item"><a th:href="@{/entry?t=3}">报刊信息</a></li>
+        <li class="layui-nav-item"><a th:href="@{/entry?t=4}">报刊类别</a></li>
+      </ul>
+      <div style="margin-left: 10%; margin-top:4%;width: 80%">
+        <div class="layui-row">
+          <table id="user" lay-filter="user"></table>
+        </div>
+      </div>
+      <!-- 表格工具栏-->
+      <script type="text/html" id="u1">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">保存</a>
+        <a class="layui-btn layui-btn-xs" lay-event="promote">升为管理员</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+      </script>
+
+      <script type="text/html" id="userSave">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">保存</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+      </script>
+
+      <script type="text/html" id="userAdd">
+        <div class="layui-btn-container">
+          <button class="layui-btn layui-btn-sm" lay-event="add">
+            新增
+          </button>
+        </div>
+      </script>
+
+      <!--新增表格的具体内容,display: none表示隐藏（编辑和新增共用的表格）-->
+      <div style="display: none" id="useraddone">
+        <form class="layui-form" action="">
+          <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+              <input id="bName" type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入用户名" class="layui-input" required>
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+              <input id="bPwd" type="password" name="password" lay-verify="title" autocomplete="off" placeholder="请输入密码" class="layui-input">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div style="display: none" id="dept_addone">
+        <form class="layui-form" action="">
+          <div class="layui-form-item">
+            <label class="layui-form-label">部门编号</label>
+            <div class="layui-input-block">
+              <input id="dept_id" type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入部门编号" class="layui-input" required>
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">部门名</label>
+            <div class="layui-input-block">
+              <input id="dept_name" type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入部门名" class="layui-input" required>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div style="display: none" id="news_addone">
+        <form class="layui-form" action="">
+          <div class="layui-form-item">
+            <label class="layui-form-label">报刊代号</label>
+            <div class="layui-input-block">
+              <input id="news_id" type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入报刊代号" class="layui-input" required>
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">报刊名称</label>
+            <div class="layui-input-block">
+              <input id="news_name" type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入报刊名称" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">出版报社</label>
+            <div class="layui-input-block">
+              <input id="news_publisher" type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入出版报社" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">出版周期</label>
+            <div class="layui-input-block">
+              <input id="news_publishBetween" type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入出版周期" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">季度报价</label>
+            <div class="layui-input-block">
+              <input id="news_price" type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入季度报价" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">内容介绍</label>
+            <div class="layui-input-block">
+              <input id="news_content" type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入内容介绍" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">分类编号</label>
+            <div class="layui-input-block">
+              <input id="news_newspaperClass" type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入分类编号" class="layui-input">
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div style="display: none" id="newsClass_addone">
+        <form class="layui-form" action="">
+          <div class="layui-form-item">
+            <label class="layui-form-label">分类编号</label>
+            <div class="layui-input-block">
+              <input id="newsClass_id" type="text" name="username" lay-verify="title" autocomplete="off" placeholder="分类编号" class="layui-input" required>
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">分类名称</label>
+            <div class="layui-input-block">
+              <input id="newsClass_name" type="text" name="username" lay-verify="title" autocomplete="off" placeholder="分类名称" class="layui-input" required>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <script>
+        var locationHref = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        var locationHrefObject = {};
+        locationHref.forEach(function (val) {
+          var parameter = val.slice(0, val.indexOf('=')); //属性
+          var data = val.slice(val.indexOf('=') + 1); //值
+          locationHrefObject[parameter] = data;
+        })
+        layui.use(['table','layer'],function () {
+          var table = layui.table;
+          var layer = layui.layer;
+          var $ = layui.$;
+
+          //用户信息
+          if(locationHrefObject['t'] === '1'){
+            table.render({
+              elem: "#user",//绑定table的id
+              url: "/user/getAll",//数据接口
+              title: '用户表',
+              cols: [
+                [
+                  {field: 'aa', type: 'numbers'},
+                  {field: 'bb', type: 'checkbox'},
+                  {field: 'username', title: '用户名', width: 100, sort: true},
+                  {field: 'password', title: '密码', width: 100,edit: 'text'},
+                  {field: 'realname', title: '真实姓名', width: 100,edit: 'text'},
+                  {field: 'email', title: '邮箱', width: 100,edit: 'text'},
+                  {field: 'idcard', title: '身份证号', width: 100,edit: 'text'},
+                  {field: 'phone', title: '联系电话', width: 100,edit: 'text'},
+                  {field: 'address', title: '联系地址', width: 100,edit: 'text'},
+                  {field: 'department', title: '部门号', width: 100,edit: 'text'},
+                  {field: '操作',toolbar:'#u1'}
+                ]
+              ],
+              page: false, //开启分页
+              toolbar:"#userAdd",
+              parseData:function (res) {
+                var data = res.data;
+                data.forEach(function (item) {
+                  item.password = '';
+                  if(item.department != null){
+                    item.department = item.department.id;
+                  }
+                });
+                return {
+                  "code": res.code,
+                  "msg": res.msg,
+                  "count": res.data.total,
+                  "data": data
+                }
+              }
+            });
+
+            // 表头工具栏（新增）
+            table.on('toolbar(user)',function (obj) {
+              console.log(obj)
+              var eventName = obj.event
+              // 新增
+              if (eventName=='add'){
+                layer.open({
+                  type:1,
+                  title:"新增",
+                  content:layui.$('#useraddone'),
+                  btn:['确定','取消'],
+                  yes:function(index, layero){
+                    // 取出输入框的内容
+                    var bn = layui.$('#bName').val()
+                    var bc = layui.$('#bPwd').val()
+
+                    // 如果有一项数据未填，则弹出提示框
+                    if (bn==''||bc==''){
+                      layer.open({
+                        title: '<div style="color:red">错误</div>'
+                        ,content: '请填写每个数据'
+                      });
+                      // 如果书籍数量不是整数，则弹出提示框
+                    } else{
+                      //向服务端发送新增指令
+                      layui.$.ajax({
+                        type: 'post',
+                        url: '/doRegister',
+                        data: {'username':bn,
+                          'password':bc,},
+                        success:function (msg) {
+
+                        }
+                      })
+                      layer.open({
+                        title: '完成',
+                        content: '增加成功',
+                        btn:['确定'],
+                        yes:function(index, layero){
+                          layer.close(index);
+                          table.reload('user');
+                        }
+                      });
+                      layer.close(index)
+
+                    }
+
+
+
+                  }
+                })
+
+              }
+
+            });
+
+            //表格工具栏（编辑和删除）
+            table.on('tool(user)',function (obj) {
+              var eventName = obj.event;
+              var username = obj.data.username;
+              // 删除
+              if (eventName == 'del'){
+                // 确认框
+                layer.confirm('确认删除吗？',function (index) {
+                  // 前端删除指定tr
+                  obj.del()
+
+                  //关闭弹出层,index是当前弹出层的的下标
+                  layer.close(index);
+
+                  //向服务端发送删除指令
+                  // '/book/delbook'
+                  layui.$.ajax({
+                    type: 'post',
+                    url: '/user/delete',
+                    data: {'username':username},
+                    success:function () {
+                      table.reload('user');
+                    }
+                  })
+                });
+
+
+              }else if (eventName=='edit'){// 修改
+                // 将所要编辑的内容先显示出来
+                layui.$.ajax({
+                          type: 'post',
+                          url: '/user/update',
+                          data: {'username':username,
+                            'password':obj.data.password,
+                            'realname':obj.data.realname,
+                            'email':obj.data.email,
+                            'idcard':obj.data.idcard,
+                            'phone':obj.data.phone,
+                            'address':obj.data.address,
+                            'department':obj.data.department
+                          },
+                          success:function (msg) {
+                            layer.open({
+                              title: '完成',
+                              content: '修改成功',
+                              btn:['确定'],
+                              yes:function(index){
+                                layer.close(index);
+                                table.reload('user');
+                              }
+                            });
+                          },
+                          error:function (msg) {
+                            layer.open({
+                              title: '<div style="color:red">错误</div>'
+                              ,content: '修改失败，请确认字段完整'
+                            });
+                          }
+                        }
+                )
+              }else if(eventName=='promote'){
+                layui.$.ajax({
+                  type: 'post',
+                  url: '/user/promote',
+                  data: {'username':username},
+                  success:function (msg) {
+                    layer.open({
+                      title: '完成',
+                      content: '提升成功',
+                      btn:['确定'],
+                      yes:function(index){
+                        layer.close(index);
+                        table.reload('user');
+                      }
+                    });
+                  },
+                  error:function (msg) {
+                    layer.open({
+                      title: '<div style="color:red">错误</div>'
+                      ,content: '提升失败'
+                    });
+                  }
+                })
+              }
+            });
+
+          }
+          //用户部门
+          if(locationHrefObject['t'] === '2'){
+            table.render({
+              elem: "#user",//绑定table的id
+              url: "/department/getAll",//数据接口
+              title: '用户表',
+              cols: [
+                [
+                  {field: 'aa', type: 'numbers'},
+                  {field: 'bb', type: 'checkbox'},
+                  {field: 'id', title: '部门号', width: 100, sort: true},
+                  {field: 'name', title: '部门名', width: 100,edit: 'text',},
+                  {field: '操作',toolbar:'#userSave'}
+                ]
+              ],
+              page: false, //开启分页
+              toolbar:"#userAdd",
+            });
+
+            // 表头工具栏（新增）
+            table.on('toolbar(user)',function (obj) {
+              console.log(obj)
+              var eventName = obj.event
+              // 新增
+              if (eventName=='add'){
+                layer.open({
+                  type:1,
+                  title:"新增",
+                  content:layui.$('#dept_addone'),
+                  btn:['确定','取消'],
+                  yes:function(index, layero){
+                    layui.$.ajax({
+                      type: 'post',
+                      url: '/department/add',
+                      data: {
+                        'id':$('#dept_id').val(),
+                        'name':$('#dept_name').val(),
+                      },
+                      success:function (msg) {
+                        layer.open({
+                          title: '完成',
+                          content: '增加成功',
+                          btn:['确定'],
+                          yes:function(index, layero){
+                            layer.close(index);
+                            table.reload('user');
+                          }
+                        });
+                        layer.close(index)
+                      }
+                    })
+                  }
+                })
+              }
+            });
+
+            //表格工具栏（编辑和删除）
+            table.on('tool(user)',function (obj) {
+              var eventName = obj.event;
+              var id = obj.data.id;
+              // 删除
+              if (eventName == 'del'){
+                // 确认框
+                layer.confirm('确认删除吗？',function (index) {
+                  // 前端删除指定tr
+                  obj.del()
+
+                  //关闭弹出层,index是当前弹出层的的下标
+                  layer.close(index);
+
+                  //向服务端发送删除指令
+                  // '/book/delbook'
+                  layui.$.ajax({
+                    type: 'post',
+                    url: '/department/delete',
+                    data: {'id': id},
+                    success:function () {
+                      table.reload('user');
+                    }
+                  })
+                });
+
+
+              }else if (eventName=='edit'){// 修改
+                // 将所要编辑的内容先显示出来
+                layui.$.ajax({
+                          type: 'post',
+                          url: '/department/update',
+                          data: {
+                            'id':id,
+                            'name':obj.data.name,
+                          },
+                          success:function (msg) {
+                            layer.open({
+                              title: '完成',
+                              content: '修改成功',
+                              btn:['确定'],
+                              yes:function(index){
+                                layer.close(index);
+                                table.reload('user');
+                              }
+                            });
+                          },
+                          error:function (msg) {
+                            layer.open({
+                              title: '<div style="color:red">错误</div>'
+                              ,content: '修改失败，请确认字段完整'
+                            });
+                          }
+                        }
+                )
+              }
+            });
+          }
+          //报刊信息
+          if(locationHrefObject['t'] === '3'){
+            table.render({
+              elem: "#user",//绑定table的id
+              url: "/newspaper/getAll",//数据接口
+              title: '用户表',
+              cols: [
+                [
+                  {field: 'aa', type: 'numbers'},
+                  {field: 'bb', type: 'checkbox'},
+                  {field: 'id', title: '报刊代号', width: 100, sort: true},
+                  {field: 'name', title: '报刊名称', width: 100,edit: 'text',},
+                  {field: 'publisher', title: '出版报社', width: 100,edit: 'text'},
+                  {field: 'publishBetween', title: '出版周期', width: 100,edit: 'text'},
+                  {field: 'price', title: '季度报价', width: 100,edit: 'text'},
+                  {field: 'content', title: '内容介绍', width: 100,edit: 'text'},
+                  {field: 'newspaperClass', title: '分类编号', width: 100,edit: 'text'},
+                  {field: '操作',toolbar:'#userSave'}
+                ]
+              ],
+              page: false, //开启分页
+              toolbar:"#userAdd",
+              parseData:function (res) {
+                var data = res.data;
+                data.forEach(function (item) {
+                  if(item.newspaperClass != null){
+                    item.newspaperClass = item.newspaperClass.id;
+                  }
+                });
+                return {
+                  "code": res.code,
+                  "msg": res.msg,
+                  "count": res.data.total,
+                  "data": data
+                }
+              }
+            });
+
+            // 表头工具栏（新增）
+            table.on('toolbar(user)',function (obj) {
+              console.log(obj)
+              var eventName = obj.event
+              // 新增
+              if (eventName=='add'){
+                layer.open({
+                  type:1,
+                  title:"新增",
+                  content:layui.$('#news_addone'),
+                  btn:['确定','取消'],
+                  yes:function(index, layero){
+                    layui.$.ajax({
+                      type: 'post',
+                      url: '/newspaper/add',
+                      data: {'id':$('#news_id').val(),
+                        'name':$('#news_name').val(),
+                        'publisher':$('#news_publisher').val(),
+                        'publishBetween':$('#news_publishBetween').val(),
+                        'price':parseInt($('#news_price').val()),
+                        'content':$('#news_content').val(),
+                        'newspaperClass':parseInt($('#news_newspaperClass').val()),
+                      },
+                      success:function (msg) {
+                        layer.open({
+                          title: '完成',
+                          content: '增加成功',
+                          btn:['确定'],
+                          yes:function(index, layero){
+                            layer.close(index);
+                            table.reload('user');
+                          }
+                        });
+                        layer.close(index)
+                      }
+                    })
+                  }
+                })
+              }
+            });
+
+            //表格工具栏（编辑和删除）
+            table.on('tool(user)',function (obj) {
+              var eventName = obj.event;
+              var id = obj.data.id;
+              // 删除
+              if (eventName == 'del'){
+                // 确认框
+                layer.confirm('确认删除吗？',function (index) {
+                  // 前端删除指定tr
+                  obj.del()
+
+                  //关闭弹出层,index是当前弹出层的的下标
+                  layer.close(index);
+
+                  //向服务端发送删除指令
+                  // '/book/delbook'
+                  layui.$.ajax({
+                    type: 'post',
+                    url: '/newspaper/delete',
+                    data: {'id': id},
+                    success:function () {
+                      table.reload('user');
+                    }
+                  })
+                });
+
+
+              }else if (eventName=='edit'){// 修改
+                // 将所要编辑的内容先显示出来
+                layui.$.ajax({
+                          type: 'post',
+                          url: '/newspaper/update',
+                          data: {'id':obj.data.id,
+                            'name':obj.data.name,
+                            'publisher':obj.data.publisher,
+                            'publishBetween':obj.data.publishBetween,
+                            'price':obj.data.price,
+                            'content':obj.data.content,
+                            'newspaperClass':obj.data.newspaperClass,
+                          },
+                          success:function (msg) {
+                            layer.open({
+                              title: '完成',
+                              content: '修改成功',
+                              btn:['确定'],
+                              yes:function(index){
+                                layer.close(index);
+                                table.reload('user');
+                              }
+                            });
+                          },
+                          error:function (msg) {
+                            layer.open({
+                              title: '<div style="color:red">错误</div>'
+                              ,content: '修改失败，请确认字段完整'
+                            });
+                          }
+                        }
+                )
+              }
+            });
+          }
+          //报刊类别
+          if(locationHrefObject['t'] === '4'){
+            table.render({
+              elem: "#user",//绑定table的id
+              url: "/newspaperClass/getAll",//数据接口
+              title: '用户表',
+              cols: [
+                [
+                  {field: 'aa', type: 'numbers'},
+                  {field: 'bb', type: 'checkbox'},
+                  {field: 'id', title: '分类编号', width: 100, sort: true},
+                  {field: 'name', title: '分类名称', width: 100,edit: 'text',},
+                  {field: '操作',toolbar:'#userSave'}
+                ]
+              ],
+              page: false, //开启分页
+              toolbar:"#userAdd",
+            });
+
+            // 表头工具栏（新增）
+            table.on('toolbar(user)',function (obj) {
+              console.log(obj)
+              var eventName = obj.event
+              // 新增
+              if (eventName=='add'){
+                layer.open({
+                  type:1,
+                  title:"新增",
+                  content:layui.$('#newsClass_addone'),
+                  btn:['确定','取消'],
+                  yes:function(index, layero){
+                    layui.$.ajax({
+                      type: 'post',
+                      url: '/newspaperClass/add',
+                      data: {
+                        'id':$('#newsClass_id').val(),
+                        'name':$('#newsClass_name').val(),
+                      },
+                      success:function (msg) {
+                        layer.open({
+                          title: '完成',
+                          content: '增加成功',
+                          btn:['确定'],
+                          yes:function(index, layero){
+                            layer.close(index);
+                            table.reload('user');
+                          }
+                        });
+                        layer.close(index)
+                      }
+                    })
+                  }
+                })
+              }
+            });
+
+            //表格工具栏（编辑和删除）
+            table.on('tool(user)',function (obj) {
+              var eventName = obj.event;
+              var id = obj.data.id;
+              // 删除
+              if (eventName == 'del'){
+                // 确认框
+                layer.confirm('确认删除吗？',function (index) {
+                  // 前端删除指定tr
+                  obj.del()
+
+                  //关闭弹出层,index是当前弹出层的的下标
+                  layer.close(index);
+
+                  //向服务端发送删除指令
+                  // '/book/delbook'
+                  layui.$.ajax({
+                    type: 'post',
+                    url: '/newspaperClass/delete',
+                    data: {'id': id},
+                    success:function () {
+                      table.reload('user');
+                    }
+                  })
+                });
+
+
+              }else if (eventName=='edit'){// 修改
+                // 将所要编辑的内容先显示出来
+                layui.$.ajax({
+                          type: 'post',
+                          url: '/newspaperClass/update',
+                          data: {'id':obj.data.id,
+                            'name':obj.data.name,
+                          },
+                          success:function (msg) {
+                            layer.open({
+                              title: '完成',
+                              content: '修改成功',
+                              btn:['确定'],
+                              yes:function(index){
+                                layer.close(index);
+                                table.reload('user');
+                              }
+                            });
+                          },
+                          error:function (msg) {
+                            layer.open({
+                              title: '<div style="color:red">错误</div>'
+                              ,content: '修改失败，请确认字段完整'
+                            });
+                          }
+                        }
+                )
+              }
+            });
+          }
+
+        });
+
+
+      </script>
+    </section>
+  </section>
+</body>
+</html>
